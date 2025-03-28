@@ -1,6 +1,8 @@
 # Invoice Generator
 
-A Python-based PDF invoice generator that creates professional invoices with customizable parameters.
+A simple Python-based PDF invoice generator that creates professional invoices with customizable parameters.
+
+This made my life easier and I hope this makes yours too. :)
 
 ## Features
 
