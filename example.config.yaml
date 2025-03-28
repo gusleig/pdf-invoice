@@ -1,0 +1,9 @@
+defaults:
+  name: "My name, last name"
+  company: "My company name"
+  language: "en"
+  bill_to: "My client's name"
+  ship_to: "My shipping address"
+  item: "My item description"
+  payment_terms: "Month"
+  output_dir: "invoices"  # Default output directory
