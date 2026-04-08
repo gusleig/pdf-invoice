@@ -1,23 +1,27 @@
+from datetime import datetime, timedelta
+from types import SimpleNamespace
 import os
+
 import pytest
-from datetime import datetime
+
 from invoice_generator.generator import InvoiceGenerator
 
 
 @pytest.fixture
 def sample_params():
-    return {
-        "name": "John Doe",
-        "company_name": "Test Company",
-        "invoice_number": 1,
-        "language": "en",
-        "due_date": "20250215",
-        "bill_to": "Client Corp",
-        "ship_to": "123 Test St\nTest City, TS\n12345",
-        "item": "Test Services",
-        "payment_terms": "Month",
-        "total_value": 1000.00
-    }
+    return SimpleNamespace(
+        name="John Doe",
+        company="Test Company",
+        invoice_number=1,
+        language="en",
+        due_date="20250215",
+        bill_to="Client Corp",
+        ship_to="123 Test St\nTest City, TS\n12345",
+        item="Test Services",
+        payment_terms="Month",
+        total_value=1000.00,
+        currency="USD",
+    )
 
 
 @pytest.fixture
@@ -35,8 +39,18 @@ def test_invoice_generation(generator, tmp_path):
 def test_date_range_calculation(generator):
     date_range = generator.get_date_range()
     due_date = datetime.strptime(generator.params.due_date, '%Y%m%d')
-    expected_start = due_date.replace(day=1).strftime('%b %d, %Y')
-    expected_end = due_date.strftime('%b %d, %Y')
+    if due_date.month == 1:
+        previous_month = due_date.replace(year=due_date.year - 1, month=12, day=1)
+    else:
+        previous_month = due_date.replace(month=due_date.month - 1, day=1)
+
+    if previous_month.month == 12:
+        next_month = previous_month.replace(year=previous_month.year + 1, month=1)
+    else:
+        next_month = previous_month.replace(month=previous_month.month + 1)
+
+    expected_start = previous_month.strftime('%b %d, %Y')
+    expected_end = (next_month - timedelta(days=1)).strftime('%b %d, %Y')
     expected_range = f"{expected_start} - {expected_end}"
     assert date_range == expected_range
 
@@ -50,11 +64,37 @@ def test_address_formatting(generator):
 def test_language_handling(sample_params):
     # Test English
     generator_en = InvoiceGenerator(sample_params)
-    elements_en = generator_en.create_header()
-    assert any("INVOICE" in str(element) for element in elements_en)
+    assert generator_en.get_labels()["invoice_title"] == "INVOICE"
+    assert generator_en.get_labels()["bill_to"] == "Bill To:"
 
     # Test Portuguese
-    sample_params["language"] = "pt"
+    sample_params.language = "pt"
     generator_pt = InvoiceGenerator(sample_params)
-    elements_pt = generator_pt.create_header()
-    assert any("FATURA" in str(element) for element in elements_pt)
+    labels_pt = generator_pt.get_labels()
+    assert labels_pt["invoice_title"] == "FATURA"
+    assert labels_pt["bill_to"] == "Faturar A:"
+    assert labels_pt["ship_to"] == "Morada:"
+    assert labels_pt["payment_terms"] == "Condições de Pagamento"
+    assert labels_pt["due_date"] == "Data de Vencimento"
+    assert labels_pt["tax"] == "IVA (0%)"
+
+
+def test_currency_formatting(sample_params):
+    sample_params.currency = "EUR"
+    generator = InvoiceGenerator(sample_params)
+
+    assert generator.format_currency(500) == "500,00 €"
+
+
+def test_brl_currency_formatting(sample_params):
+    sample_params.currency = "BRL"
+    generator = InvoiceGenerator(sample_params)
+
+    assert generator.format_currency(1234.5) == "R$ 1.234,50"
+
+
+def test_usd_currency_formatting(sample_params):
+    sample_params.currency = "USD"
+    generator = InvoiceGenerator(sample_params)
+
+    assert generator.format_currency(1234.5) == "US$ 1,234.50"

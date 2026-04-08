@@ -14,18 +14,12 @@ This made my life easier and I hope this makes yours too. :)
 
 ## Installation
 
-Clone the repository and install the package:
+Clone the repository and sync the project with `uv`:
 
 ```bash
 git clone https://github.com/yourusername/invoice-generator.git
 cd invoice-generator
-pip install -e .
-```
-
-For development installation:
-
-```bash
-pip install -e ".[dev]"
+uv sync --group dev
 ```
 
 ## Usage
@@ -35,7 +29,7 @@ You can use the invoice generator either as a command-line tool or as a Python p
 ### Command Line
 
 ```bash
-invoice-generator \
+uv run invoice-generator \
   --name "Your Name" \
   --company "Your Company" \
   --invoice-number 1 \
@@ -53,7 +47,7 @@ or a simplified version if you have a config.yaml file:
 
 ```bash
 
-invoice-generator --invoice-number 6 --due-date 20250415 --total-value 10000
+uv run invoice-generator --invoice-number 6 --due-date 20250415 --total-value 10000
 
 ```
 
@@ -81,27 +75,15 @@ generator.generate("invoice.pdf")
 
 ## Development
 
-1. Create a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate  # Windows
-```
+Use `uv` for environment and command management:
 
-2. Install development dependencies:
 ```bash
-pip install -r requirements-dev.txt
-```
-
-3. Run tests:
-```bash
-pytest
-```
-
-4. Format code:
-```bash
-black src tests
-isort src tests
+uv sync --group dev
+uv run pytest
+uv run black src tests
+uv run isort src tests
+uv run flake8 src tests
+uv run mypy src
 ```
 
 ## License
