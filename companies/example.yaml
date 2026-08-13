@@ -1,0 +1,17 @@
+# Template for a company config used by `invoice-monthly`.
+# Copy to companies/<slug>.yaml (gitignored) and fill in real values.
+slug: mycompany
+last_invoice_number: 0
+defaults:
+  name: "Your Name"
+  company: "Your Company LLC"
+  language: "en" # en | pt
+  bill_to: 'Client Inc\nTax ID: 123456'
+  ship_to: '123 Some St\nCity, Country'
+  payment_terms: "Month"
+  currency: "USD" # USD | EUR | BRL
+  total_value: 1000
+  # Item description. Optional placeholders, filled with the invoiced period
+  # (the month before the due date):
+  #   {start_day} {end_day} {month_pt} {month_en} {year}
+  item: "Services rendered from {start_day} to {end_day} {month_en} {year}"

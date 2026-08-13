@@ -38,3 +38,6 @@ ENV/
 .DS_Store
 Thumbs.db
 config.yaml
+# Company configs hold personal data (example.yaml is the committed template)
+companies/*.yaml
+!companies/example.yaml

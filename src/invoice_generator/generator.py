@@ -236,9 +236,9 @@ def ensure_output_directory(directory):
         os.makedirs(directory)
 
 
-def create_parser():
+def create_parser(config_path=None):
     """Create argument parser with defaults from config."""
-    config = load_config()
+    config = load_config(config_path)
 
     parser = argparse.ArgumentParser(description='Generate PDF Invoice')
     parser.add_argument('--name', default=config.get('name'), help='Full name')
@@ -263,7 +263,15 @@ def create_parser():
 
 
 def main():
-    parser = create_parser()
+    # Pre-parse --config so its defaults feed the main parser
+    pre_parser = argparse.ArgumentParser(add_help=False)
+    pre_parser.add_argument('--config')
+    pre_args, _ = pre_parser.parse_known_args()
+
+    if pre_args.config and not os.path.exists(pre_args.config):
+        pre_parser.error(f"Config file not found: {pre_args.config}")
+
+    parser = create_parser(pre_args.config)
     args = parser.parse_args()
 
     # If any required values are missing from both command line and config, exit with error

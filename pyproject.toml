@@ -40,6 +40,7 @@ dev = [
 
 [project.scripts]
 invoice-generator = "invoice_generator.generator:main"
+invoice-monthly = "invoice_generator.monthly:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/invoice_generator"]
